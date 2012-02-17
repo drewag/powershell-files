@@ -2,6 +2,9 @@
 # Author(s): Andrew Wagner, Joseph Coleman
 # -----------------------------------------------------
 
+$wafCommands = @()
+$wafOptions = @()
+
 function GarminWafTabExpansion( [string]$lastBlock )
 {
     switch -regex ( $lastBlock )
@@ -14,47 +17,61 @@ function GarminWafTabExpansion( [string]$lastBlock )
         {
             GarminWafCommands( $matches[2] )
         }
+        ' (--product=)(\S*)$'
+        {
+            $cmds = @()
+            GarminWafCommands( $matches[2] ) | foreach {
+                $cmds += $matches[1] + $_
+            }
+            $cmds
+        }
     }
 }
 
 function GarminWafCommands( [string]$filter )
 {
-    $cmdList = @()
-    $output = .\waf --help
-    foreach( $line in $output )
+    if( $wafCommands.length -eq 0 )
     {
-        if($line -match '^\s+(\w+)\s*:')
+        $output = .\waf --help
+        foreach( $line in $output )
         {
-            $cmd = $matches[1]
-            if( $filter -and $cmd.StartsWith($filter) )
+            if($line -match '^\s+(\w+)\s*:')
             {
-                $cmdList += $cmd
-            }
-            elseif(-not $filter)
-            {
-                $cmdList += $cmd
+                $cmd = $matches[1]
+                if( $filter -and $cmd.StartsWith($filter) )
+                {
+                    $wafCommands += $cmd
+                }
+                elseif(-not $filter)
+                {
+                    $wafCommands += $cmd
+                }
             }
         }
+        [Array]::Sort([array]$wafCommands)
     }
-    $cmdList | sort;
+    return $wafCommands
 }
 
 function GarminWafOptions( [string]$filter )
 {
-    $cmdList = @()
-    $output = .\waf --help
-    [regex]$regex = ' (-[\w-]*?)(?=[\, =:])'
-    $matches = $regex.Matches( $output, [Text.RegularExpressions.RegExOptions]::Multiline )
-    $matches | foreach {
-        $cmd = $_.Groups[1].Value
-        if( $filter -and $cmd.StartsWith($filter) )
-        {
-            $cmdList += $cmd
+    if( $wafOptions.length -eq 0 )
+    {
+        $output = .\waf --help
+        [regex]$regex = ' (-[\w-]*?)(?=[\, =:])'
+        $matches = $regex.Matches( $output, [Text.RegularExpressions.RegExOptions]::Multiline )
+        $matches | foreach {
+            $cmd = $_.Groups[1].Value
+            if( $filter -and $cmd.StartsWith($filter) )
+            {
+                $wafOptions += $cmd
+            }
+            elseif(-not $filter)
+            {
+                $wafOptions += $cmd
+            }
         }
-        elseif(-not $filter)
-        {
-            $cmdList += $cmd
-        }
+        [Array]::Sort([array]$wafOptions)
     }
-    $cmdList | sort;
+    return $wafOptions
 }

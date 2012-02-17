@@ -24,15 +24,23 @@ function GetCommonPrefix( [string]$first, [string]$second )
     return $common
 }
 
-function GetCommonPrefixInArray( [array]$list )
+# @return the maximum length prefix that is shared between all
+# items in the array.
+#
+# For optimization this function assumes that all items will at
+# least have the same prefix that is "$filter".
+function GetCommonPrefixInArray( [array]$list, [string]$filter )
 {
     $commonLetters = $list[0].Replace("'","")
 
-    #Write-Host
-    $list | foreach {
-        $_ = $_.Replace("'", "" )
-        #Write-Host $_
-        $commonLetters = GetCommonPrefix $_ $commonLetters
+    for( $i = 1; $i -lt $list.length; $i++ )
+    {
+        $el = $list[$i].Replace("'", "" )
+        $commonLetters = GetCommonPrefix $el $commonLetters
+        if( $commonLetters.length -eq $filter.length )
+        {
+            break
+        }
     }
     return $commonLetters
 }

@@ -23,6 +23,7 @@ Set-Variable HOME $env:userprofile
 # -----------------------------------------------------
 # Remove ls alias to default to one in path
 Remove-Item alias:ls
+Set-Alias Find 'C:\Program Files (x86)\git\bin\find.exe'
 
 # -----------------------------------------------------
 # Customization Variables
@@ -72,7 +73,7 @@ function TabExpansion($line, $lastWord) {
     {
         $list = GetFilteredFileList $lastWord
     }
-    $commonLetters = GetCommonPrefixInArray $list
+    $commonLetters = GetCommonPrefixInArray $list $lastWord
 
     if( $commonLetters.Contains( ' ' ) -and
         !$lastWord.Contains( ' ' ) )
