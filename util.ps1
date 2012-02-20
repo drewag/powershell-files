@@ -2,6 +2,12 @@
 # Author(s): Andrew Wagner, Joseph Coleman
 # -----------------------------------------------------
 
+function DoesMatchFilter( [string]$word, [string]$filter )
+{
+    $pattern = $filter.Replace( '*', '.+' )
+    return $word -match "^$pattern"
+}
+
 function GetHistoryItem([int]$item)
 {
     (Get-History $item).CommandLine
@@ -48,10 +54,21 @@ function GetCommonPrefixInArray( [array]$list, [string]$filter )
 function GetFilteredFileList( [string]$filter )
 {
     $list = @()
-    $basename = $filter.Split( '/\' )[-1]
     $testWord = $filter + '*'
+
+    $origFilter = ""
+    $numOrigComponents = $filter.Split( '/\' ).length
+    if( $filter.Contains( '*' ) )
+    {
+        $origFilter = $filter
+        $filter = $filter.Split( '*' )[0]
+    }
+    $numComponents = $numOrigComponents - $filter.Split( '/\' ).length + 1
+    $base = $filter.Split( '/\' )[-1]
+    $root = $filter.Substring( 0, $filter.length - $base.length )
     gci $testWord | foreach {
-        $newEl = $filter + $_.name.Substring( $basename.length )
+        $pertinentPath = [string]::join( '\', $_.ToString().Split( '\' )[-$numComponents..-1] )
+        $newEl = $root + $base + $pertinentPath.Substring( $base.length )
         if( $newEl.Contains( ' ' ) )
         {
             if( !$filter.Contains( ' ' ) )
@@ -71,6 +88,11 @@ function GetFilteredFileList( [string]$filter )
         #    $newEl += '\'
         #}
         $list += $newEl
+    }
+
+    if( $origFilter.length -gt 0 )
+    {
+        $list += $origFilter
     }
     return $list
 }

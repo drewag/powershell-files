@@ -38,7 +38,7 @@ function GarminWafCommands( [string]$filter )
             if($line -match '^\s+(\w+)\s*:')
             {
                 $cmd = $matches[1]
-                if( $filter -and $cmd.StartsWith($filter) )
+                if( $filter -and (DoesMatchFilter $cmd $filter) )
                 {
                     $wafCommands += $cmd
                 }
@@ -62,7 +62,7 @@ function GarminWafOptions( [string]$filter )
         $matches = $regex.Matches( $output, [Text.RegularExpressions.RegExOptions]::Multiline )
         $matches | foreach {
             $cmd = $_.Groups[1].Value
-            if( $filter -and $cmd.StartsWith($filter) )
+            if( $filter -and (DoesMatchFilter $cmd $filter) )
             {
                 $wafOptions += $cmd
             }

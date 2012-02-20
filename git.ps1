@@ -2,6 +2,7 @@
 # Author(s): Andrew Wagner, Joseph Coleman
 # -----------------------------------------------------
 
+
 function GitPrompt
 {
     if( IsCurrentDirectoryGitRepository )
@@ -97,7 +98,7 @@ function GitCommands($filter) {
         if($line -match '^\s+(\w+)')
         {
             $cmd = $matches[1]
-            if( $filter -and $cmd.StartsWith($filter) )
+            if( $filter -and (DoesMatchFilter $cmd $filter) )
             {
                 $cmdList += $cmd
             }
@@ -116,7 +117,7 @@ function GitCommands($filter) {
         $cmd = $_.Trim()
         if( $cmdList -notcontains $cmd )
         {
-            if( $filter -and $cmd.StartsWith( $filter ) )
+            if( $filter -and (DoesMatchFilter $cmd $filter) )
             {
                 $cmdList += $cmd
             }
@@ -132,7 +133,7 @@ function GitCommands($filter) {
 function GitRemotes( [string]$filter )
 {
   if($filter) {
-    git remote | where { $_.StartsWith($filter) }
+    git remote | where { DoesMatchFitler $_ $filter }
   }
   else {
     git remote
@@ -146,7 +147,7 @@ function GitAllBranches($filter)
       {
         $branch = $matches[1] -replace '^remotes/origin/', ''
         $branch = $branch -replace ' ->.*', ''
-        if( $filter -and $branch.StartsWith( $filter ) )
+        if( $filter -and (DoesMatchFilter $branch $filter) )
         {
           $branch
         }
@@ -164,7 +165,7 @@ function GitLocalBranches($filter)
       if( $_ -match "^\*?\s*(.*)" )
       {
         $branch = $matches[1]
-        if($filter -and $branch.StartsWith($filter) )
+        if($filter -and (DoesMatchFilter $branch $filter) )
         {
           $branch
         }
