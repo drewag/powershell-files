@@ -61,10 +61,10 @@ function GitTabExpansion($lastBlock)
           GitAllBranches($matches[1])
         }
 
-        #handles git merge <brancj name>
+        #handles git merge <branch name>
         'git merge (\S*)$'
         {
-          GitLocalBranches($matches[2])
+          GitLocalBranches($matches[1])
         }
 
         #handles git <cmd>
@@ -132,8 +132,8 @@ function GitCommands($filter) {
 
 function GitRemotes( [string]$filter )
 {
-  if($filter) {
-    git remote | where { DoesMatchFitler $_ $filter }
+if($filter) {
+    git remote | where { DoesMatchFilter $_ $filter }
   }
   else {
     git remote
