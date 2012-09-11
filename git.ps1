@@ -58,7 +58,7 @@ function GitTabExpansion($lastBlock)
         #handles git checkout <branch name>
         'git checkout (\S*)$'
         {
-          GitAllBranches($matches[2])
+          GitAllBranches($matches[1])
         }
 
         #handles git merge <brancj name>
